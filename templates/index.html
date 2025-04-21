@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <title>Control de Asistentes</title>
+    <script>
+        // Función para búsqueda en tiempo real
+        async function search(query) {
+            const response = await fetch(`/search?query=${query}`);
+            const asistentes = await response.json();
+            const container = document.querySelector(".asistentes-container");
+            container.innerHTML = ""; // Limpiar resultados previos
+
+            asistentes.forEach(asistente => {
+                const div = document.createElement("div");
+                div.className = asistente.ingreso ? "asistente ingresado" : "asistente no-ingresado";
+
+                div.innerHTML = `
+                    <p><strong>Nombre:</strong> ${asistente.nombre}</p>
+                    <p><strong>Documento:</strong> ${asistente.documento}</p>
+                    <p><strong>Teléfono:</strong> ${asistente.telefono}</p>
+                    <p><strong>Correo:</strong> ${asistente.correo}</p>
+                    <div class="button-container">
+                        ${asistente.ingreso ? "<strong>INGRESADO</strong>" : `<a href="/ingresar/${asistente.documento}" class="btn-ingresar">Ingresar</a>`}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Control de Asistentes - Rave PoolParty</h1>
+
+    <!-- Barra de búsqueda -->
+    <input type="text" placeholder="Buscar por nombre, documento, teléfono o correo" oninput="search(this.value)">
+
+    <!-- Contenedor para la lista de asistentes -->
+    <div class="asistentes-container">
+        {% for asistente in asistentes %}
+        <div class="asistente {% if asistente['ingreso'] %}ingresado{% else %}no-ingresado{% endif %}">
+            <p><strong>Nombre:</strong> {{ asistente['nombre'] }}</p>
+            <p><strong>Documento:</strong> {{ asistente['documento'] }}</p>
+            <p><strong>Teléfono:</strong> {{ asistente['telefono'] }}</p>
+            <p><strong>Correo:</strong> {{ asistente['correo'] }}</p>
+            <div class="button-container">
+                {% if not asistente['ingreso'] %}
+                <a href="/ingresar/{{ asistente['documento'] }}" class="btn-ingresar">Ingresar</a>
+                {% else %}
+                <strong>INGRESADO</strong>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Botón para agregar asistentes -->
+    <a href="/add" class="btn-agregar">Agregar Asistente</a>
+</body>
+</html>
